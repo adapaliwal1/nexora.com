@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pending Payments Summary</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      padding: 40px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    button, select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #00b894;
+      color: white;
+      cursor: pointer;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h2>📋 Pending Payments Summary</h2>
+
+  <div class="controls">
+    <select id="monthFilter">
+      <option value="">All Months</option>
+    </select>
+    <select id="yearFilter">
+      <option value="">All Years</option>
+    </select>
+    <button onclick="applyFilters()">🔍 Filter</button>
+    <button onclick="exportToExcel()">📥 Export to Excel</button>
+    <button onclick="window.print()">🖨️ Print</button>
+  </div>
+
+  <table id="summaryTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Customer</th>
+        <th onclick="sortTable(1)">Total Sales (₹)</th>
+        <th onclick="sortTable(2)">Cash Received (₹)</th>
+        <th onclick="sortTable(3)">Pending (₹)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const sales = JSON.parse(localStorage.getItem("sales")) || [];
+    const cash = JSON.parse(localStorage.getItem("cash")) || [];
+
+    const tbody = document.querySelector("#summaryTable tbody");
+    const monthFilter = document.getElementById("monthFilter");
+    const yearFilter = document.getElementById("yearFilter");
+
+    function groupData() {
+      const result = {};
+
+      sales.forEach(s => {
+        const customer = s.customer;
+        const date = new Date(s.date);
+
+        if (!result[customer]) result[customer] = { sales: 0, received: 0 };
+        result[customer].sales += parseFloat(s.total);
+      });
+
+      cash.forEach(c => {
+        const customer = c.customer;
+        const date = new Date(c.date);
+
+        if (!result[customer]) result[customer] = { sales: 0, received: 0 };
+        result[customer].received += parseFloat(c.amount);
+      });
+
+      return result;
+    }
+
+    function renderTable(data) {
+      tbody.innerHTML = '';
+      Object.entries(data).forEach(([name, { sales, received }]) => {
+        const pending = sales - received;
+        tbody.innerHTML += `
+          <tr>
+            <td>${name}</td>
+            <td>₹${sales.toFixed(2)}</td>
+            <td>₹${received.toFixed(2)}</td>
+            <td>₹${pending.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function populateFilters() {
+      const allDates = [...sales.map(s => new Date(s.date)), ...cash.map(c => new Date(c.date))];
+      const years = new Set();
+      const months = new Set();
+
+      allDates.forEach(date => {
+        years.add(date.getFullYear());
+        months.add(date.getMonth());
+      });
+
+      [...months].sort().forEach(m => {
+        monthFilter.innerHTML += `<option value="${m}">${new Date(2024, m).toLocaleString('default', { month: 'long' })}</option>`;
+      });
+
+      [...years].sort().forEach(y => {
+        yearFilter.innerHTML += `<option value="${y}">${y}</option>`;
+      });
+    }
+
+    function applyFilters() {
+      const m = monthFilter.value;
+      const y = yearFilter.value;
+
+      const filteredSales = sales.filter(s => {
+        const d = new Date(s.date);
+        return (!m || d.getMonth() == m) && (!y || d.getFullYear() == y);
+      });
+
+      const filteredCash = cash.filter(c => {
+        const d = new Date(c.date);
+        return (!m || d.getMonth() == m) && (!y || d.getFullYear() == y);
+      });
+
+      const grouped = {};
+      filteredSales.forEach(s => {
+        if (!grouped[s.customer]) grouped[s.customer] = { sales: 0, received: 0 };
+        grouped[s.customer].sales += parseFloat(s.total);
+      });
+
+      filteredCash.forEach(c => {
+        if (!grouped[c.customer]) grouped[c.customer] = { sales: 0, received: 0 };
+        grouped[c.customer].received += parseFloat(c.amount);
+      });
+
+      renderTable(grouped);
+    }
+
+    function exportToExcel() {
+      let csv = "Customer,Total Sales,Cash Received,Pending\n";
+      [...tbody.querySelectorAll("tr")].forEach(row => {
+        let rowData = [...row.children].map(cell => cell.textContent);
+        csv += rowData.join(",") + "\n";
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "PendingPaymentsSummary.csv";
+      link.click();
+    }
+
+    function sortTable(colIndex) {
+      const rows = [...tbody.rows];
+      const sorted = rows.sort((a, b) => {
+        const val1 = a.cells[colIndex].textContent.replace(/[₹,]/g, '');
+        const val2 = b.cells[colIndex].textContent.replace(/[₹,]/g, '');
+        return parseFloat(val1) - parseFloat(val2);
+      });
+      tbody.innerHTML = '';
+      sorted.forEach(r => tbody.appendChild(r));
+    }
+
+    populateFilters();
+    renderTable(groupData());
+  </script>
+</body>
+</html>

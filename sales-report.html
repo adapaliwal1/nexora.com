@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sales Report - SimpleBooks</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2d3436;
+    }
+
+    .filters {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    select, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 0 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #00b894;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      color: #00b894;
+      font-weight: bold;
+    }
+
+    .action-btn {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #0984e3;
+    }
+
+    .delete-btn {
+      background-color: #d63031;
+    }
+  </style>
+</head>
+<body>
+  <h2>📊 Sales Report</h2>
+  <div class="filters">
+    <label for="fromYear">From:</label>
+    <select id="fromYear"></select>
+    <label for="toYear">To:</label>
+    <select id="toYear"></select>
+    <button onclick="filterSales()">🔍 Filter</button>
+  </div>
+
+  <table id="salesTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Product</th>
+        <th>Customer</th>
+        <th>Qty</th>
+        <th>Total (₹)</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="back-link">
+    <a href="salesentry.html">🔙 Back to Sales Entry</a>
+  </div>
+
+  <script>
+    let sales = JSON.parse(localStorage.getItem("sales")) || [];
+    const tableBody = document.querySelector("#salesTable tbody");
+    const fromYear = document.getElementById("fromYear");
+    const toYear = document.getElementById("toYear");
+
+    function getUniqueYears() {
+      const years = new Set();
+      sales.forEach(s => {
+        const year = new Date(s.date).getFullYear();
+        years.add(year);
+      });
+      return Array.from(years).sort();
+    }
+
+    function populateYearFilters() {
+      const years = getUniqueYears();
+      years.forEach(y => {
+        const opt1 = new Option(y, y);
+        const opt2 = new Option(y, y);
+        fromYear.add(opt1);
+        toYear.add(opt2);
+      });
+
+      fromYear.value = years[0];
+      toYear.value = years[years.length - 1];
+    }
+
+    function renderSales(filteredSales) {
+      tableBody.innerHTML = '';
+      if (filteredSales.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6">No sales found for selected years.</td></tr>';
+        return;
+      }
+
+      filteredSales.forEach((sale, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${sale.date}</td>
+          <td>${sale.product}</td>
+          <td>${sale.customer}</td>
+          <td>${sale.quantity}</td>
+          <td>₹${sale.total}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="editSale(${index})">📝 Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteSale(${index})">🗑️ Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function filterSales() {
+      const from = parseInt(fromYear.value);
+      const to = parseInt(toYear.value);
+
+      const filtered = sales.filter(sale => {
+        const year = new Date(sale.date).getFullYear();
+        return year >= from && year <= to;
+      });
+
+      renderSales(filtered);
+    }
+
+    function deleteSale(index) {
+      if (!confirm("Are you sure you want to delete this sale?")) return;
+      sales.splice(index, 1);
+      localStorage.setItem("sales", JSON.stringify(sales));
+      filterSales();
+    }
+
+    function editSale(index) {
+      const sale = sales[index];
+      const newProduct = prompt("Edit Product Name:", sale.product);
+      const newCustomer = prompt("Edit Customer Name:", sale.customer);
+      const newQty = prompt("Edit Quantity:", sale.quantity);
+
+      if (newProduct && newCustomer && !isNaN(newQty)) {
+        sale.product = newProduct.trim();
+        sale.customer = newCustomer.trim();
+        sale.quantity = parseInt(newQty);
+        sale.total = (parseFloat(sale.total) / sale.quantity * sale.quantity).toFixed(2); // keep same rate
+        sales[index] = sale;
+        localStorage.setItem("sales", JSON.stringify(sales));
+        filterSales();
+      } else {
+        alert("Invalid input. Edit cancelled.");
+      }
+    }
+
+    populateYearFilters();
+    renderSales(sales);
+  </script>
+</body>
+</html>

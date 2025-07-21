@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SimpleBooks - Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .dashboard {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
+      text-align: center;
+      width: 400px;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #5a4de2;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h2>Welcome, Admin 👋</h2>
+    <a href="add.product.html" class="card"> <button class="btn">➕ Add Products</button>
+   <a href="addcustomer.html" class="card"> <button class="btn">👥 Add Customers</button>
+   <a href="salesentry.html" class="card"> <button class="btn">💰 Sales Entry</button>
+   <a href="purchaseentry.html" class="card"> <button class="btn">📥 Purchase Entry</button>
+    <a href="reports.html" class="card"> <button class="btn">📊 View Reports</button>
+ <a href="cashrecieved.html" class="card"> <button class="btn">📊 cash recieved</button>
+ <a href="viewcustomer.html" class="card"> <button class="btn">📊 View Reports</button>
+    <button class="btn" onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <script>
+    function logout() {
+      alert("You have been logged out.");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>

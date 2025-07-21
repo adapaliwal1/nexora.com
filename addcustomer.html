@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Customer - SimpleBooks</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .form-box {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
+      width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input, textarea {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      margin-top: 15px;
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5a4de2;
+    }
+
+    .message {
+      margin-top: 15px;
+      color: green;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2 id="formTitle">👤 Add New Customer</h2>
+    <input type="text" id="customerName" placeholder="Customer Name" /><br />
+    <input type="text" id="phone" placeholder="Phone Number" /><br />
+    <input type="email" id="email" placeholder="Email Address" /><br />
+    <textarea id="address" rows="3" placeholder="Address"></textarea><br />
+    <button onclick="saveCustomer()" id="saveBtn">Save Customer</button>
+    <div class="message" id="msg"></div>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById('customerName');
+    const phoneInput = document.getElementById('phone');
+    const emailInput = document.getElementById('email');
+    const addressInput = document.getElementById('address');
+    const msg = document.getElementById('msg');
+    const saveBtn = document.getElementById('saveBtn');
+    const formTitle = document.getElementById('formTitle');
+
+    let editIndex = localStorage.getItem('editCustomerIndex');
+    let editData = localStorage.getItem('editCustomer');
+
+    // If editing, pre-fill form
+    if (editData && editIndex !== null) {
+      let customer = JSON.parse(editData);
+      nameInput.value = customer.name;
+      phoneInput.value = customer.phone;
+      emailInput.value = customer.email;
+      addressInput.value = customer.address;
+
+      saveBtn.innerText = "Update Customer";
+      formTitle.innerText = "✏️ Edit Customer";
+    }
+
+    function saveCustomer() {
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const email = emailInput.value.trim();
+      const address = addressInput.value.trim();
+
+      if (!name || !phone || !email || !address) {
+        alert("❗ Please fill in all fields.");
+        return;
+      }
+
+      const customer = { name, phone, email, address };
+      let customers = JSON.parse(localStorage.getItem('customers')) || [];
+
+      if (editData && editIndex !== null) {
+        customers[editIndex] = customer;
+        localStorage.removeItem('editCustomer');
+        localStorage.removeItem('editCustomerIndex');
+        msg.innerText = "✅ Customer updated!";
+      } else {
+        customers.push(customer);
+        msg.innerText = "✅ Customer saved!";
+      }
+
+      localStorage.setItem('customers', JSON.stringify(customers));
+
+      // Clear fields
+      nameInput.value = '';
+      phoneInput.value = '';
+      emailInput.value = '';
+      addressInput.value = '';
+      saveBtn.innerText = "Save Customer";
+      formTitle.innerText = "👤 Add New Customer";
+
+      setTimeout(() => {
+        window.location.href = 'view-customers.html';
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

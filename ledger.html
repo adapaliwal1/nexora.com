@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Ledger - SimpleBooks</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2d3436;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #0984e3;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      color: #0984e3;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>📒 Customer Ledger</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Sales (₹)</th>
+        <th>Returns (₹)</th>
+        <th>Cash Received (₹)</th>
+        <th>Balance (₹)</th>
+      </tr>
+    </thead>
+    <tbody id="ledgerTableBody">
+    </tbody>
+  </table>
+
+  <div class="back-link">
+    <a href="dashboard.html">🔙 Back to Dashboard</a>
+  </div>
+
+  <script>
+    const ledgerBody = document.getElementById('ledgerTableBody');
+
+    const sales = JSON.parse(localStorage.getItem("sales")) || [];
+    const returns = JSON.parse(localStorage.getItem("returns")) || [];
+    const payments = JSON.parse(localStorage.getItem("payments")) || [];
+
+    const ledgerMap = {};
+
+    sales.forEach(s => {
+      const customer = s.customer;
+      const total = parseFloat(s.total);
+
+      if (!ledgerMap[customer]) ledgerMap[customer] = { sales: 0, returns: 0, payments: 0 };
+      ledgerMap[customer].sales += total;
+    });
+
+    returns.forEach(r => {
+      const customer = r.customer;
+      const total = parseFloat(r.total);
+
+      if (!ledgerMap[customer]) ledgerMap[customer] = { sales: 0, returns: 0, payments: 0 };
+      ledgerMap[customer].returns += total;
+    });
+
+    payments.forEach(p => {
+      const customer = p.customer;
+      const amount = parseFloat(p.amount);
+
+      if (!ledgerMap[customer]) ledgerMap[customer] = { sales: 0, returns: 0, payments: 0 };
+      ledgerMap[customer].payments += amount;
+    });
+
+    Object.keys(ledgerMap).forEach(customer => {
+      const { sales, returns, payments } = ledgerMap[customer];
+      const balance = sales - returns - payments;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${customer}</td>
+        <td>₹${sales.toFixed(2)}</td>
+        <td>₹${returns.toFixed(2)}</td>
+        <td>₹${payments.toFixed(2)}</td>
+        <td><strong>₹${balance.toFixed(2)}</strong></td>
+      `;
+      ledgerBody.appendChild(row);
+    });
+  </script>
+</body>
+</html>

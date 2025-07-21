@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reports - SimpleBooks</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      padding: 40px;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 45%;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+
+    .card h3 {
+      margin: 10px 0;
+      font-size: 22px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      animation: fadeIn 1.2s ease;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #ffe0c3;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      margin-top: 40px;
+      font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+  <h2>📊 Business Report</h2>
+
+  <div class="summary">
+    <div class="card">
+      <h3>Total Sales</h3>
+      <p id="totalSales">₹0</p>
+    </div>
+    <div class="card">
+      <h3>Total Purchases</h3>
+      <p id="totalPurchases">₹0</p>
+    </div>
+  </div>
+
+  <h3 class="section-title">🧾 Sales History</h3>
+  <table id="salesTable">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Customer</th>
+        <th>Qty</th>
+        <th>Total</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3 class="section-title">📥 Purchase History</h3>
+  <table id="purchaseTable">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Supplier</th>
+        <th>Qty</th>
+        <th>Total</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const sales = JSON.parse(localStorage.getItem('sales')) || [];
+    const purchases = JSON.parse(localStorage.getItem('purchases')) || [];
+
+    // Total Sales
+    let salesTotal = sales.reduce((sum, item) => sum + parseFloat(item.total), 0);
+    document.getElementById('totalSales').textContent = "₹" + salesTotal.toFixed(2);
+
+    // Total Purchases
+    let purchasesTotal = purchases.reduce((sum, item) => sum + parseFloat(item.total), 0);
+    document.getElementById('totalPurchases').textContent = "₹" + purchasesTotal.toFixed(2);
+
+    // Populate Sales Table
+    const salesTable = document.getElementById('salesTable').querySelector('tbody');
+    sales.forEach(item => {
+      let row = salesTable.insertRow();
+      row.innerHTML = `
+        <td>${item.product}</td>
+        <td>${item.customer}</td>
+        <td>${item.quantity}</td>
+        <td>₹${item.total}</td>
+        <td>${item.date}</td>
+      `;
+    });
+
+    // Populate Purchase Table
+    const purchaseTable = document.getElementById('purchaseTable').querySelector('tbody');
+    purchases.forEach(item => {
+      let row = purchaseTable.insertRow();
+      row.innerHTML = `
+        <td>${item.product}</td>
+        <td>${item.supplier}</td>
+        <td>${item.quantity}</td>
+        <td>₹${item.total}</td>
+        <td>${item.date}</td>
+      `;
+    });
+  </script>
+</body>
+</html>

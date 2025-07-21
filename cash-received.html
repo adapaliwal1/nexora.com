@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cash Received - SimpleBooks</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(to right, #d3cce3, #e9e4f0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 400px;
+      animation: fadeIn 0.8s ease-in-out;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    select, input, textarea {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      margin-top: 15px;
+      background-color: #0984e3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0769c0;
+    }
+
+    .message {
+      margin-top: 15px;
+      color: green;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>💵 Cash Received</h2>
+    <select id="customerSelect">
+      <option value="">Select Customer</option>
+    </select>
+    <input type="number" id="amount" placeholder="Amount Received (₹)" min="1" />
+    <textarea id="note" rows="3" placeholder="Note (optional)"></textarea>
+    <button onclick="savePayment()">Save Payment</button>
+    <div class="message" id="msg"></div>
+  </div>
+
+  <script>
+    const customerSelect = document.getElementById("customerSelect");
+    const customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+    // Populate customer dropdown
+    customers.forEach((cust, index) => {
+      const opt = document.createElement("option");
+      opt.value = index;
+      opt.textContent = cust.name;
+      customerSelect.appendChild(opt);
+    });
+
+    function savePayment() {
+      const index = customerSelect.value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const note = document.getElementById("note").value.trim();
+
+      if (index === "" || isNaN(amount) || amount <= 0) {
+        alert("Please select a customer and enter a valid amount.");
+        return;
+      }
+
+      const payment = {
+        customer: customers[index].name,
+        amount,
+        note,
+        date: new Date().toLocaleString()
+      };
+
+      let payments = JSON.parse(localStorage.getItem("payments")) || [];
+      payments.push(payment);
+      localStorage.setItem("payments", JSON.stringify(payments));
+
+      document.getElementById("msg").textContent = "✅ Payment recorded!";
+      document.getElementById("amount").value = '';
+      document.getElementById("note").value = '';
+      customerSelect.value = '';
+    }
+  </script>
+</body>
+</html>

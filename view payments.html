@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cash Received Report - SimpleBooks</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(to right, #fdfcfb, #e2d1c3);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2d3436;
+    }
+
+    .filters {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 16px;
+      margin: 0 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #6c5ce7;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .delete-btn {
+      background-color: #d63031;
+      border: none;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      font-weight: bold;
+      color: #6c5ce7;
+    }
+  </style>
+</head>
+<body>
+  <h2>📋 Cash Received Report</h2>
+  <div class="filters">
+    <label for="customerFilter">Select Customer:</label>
+    <select id="customerFilter" onchange="filterPayments()">
+      <option value="all">All Customers</option>
+    </select>
+  </div>
+
+  <table id="paymentTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Customer</th>
+        <th>Amount (₹)</th>
+        <th>Note</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows will be inserted here -->
+    </tbody>
+  </table>
+
+  <div class="back-link">
+<a href="cash-received.html">Add Cash Received</a>
+
+  </div>
+
+  <script>
+    const customerFilter = document.getElementById("customerFilter");
+    const tableBody = document.querySelector("#paymentTable tbody");
+    let payments = JSON.parse(localStorage.getItem("payments")) || [];
+
+    // Populate customer names
+    function populateCustomers() {
+      const names = [...new Set(payments.map(p => p.customer))];
+      names.forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        customerFilter.appendChild(opt);
+      });
+    }
+
+    // Display filtered payments
+    function filterPayments() {
+      const selected = customerFilter.value;
+      const filtered = selected === "all" ? payments : payments.filter(p => p.customer === selected);
+      renderTable(filtered);
+    }
+
+    // Render table rows
+    function renderTable(data) {
+      tableBody.innerHTML = '';
+      if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5">No payments found.</td></tr>`;
+        return;
+      }
+
+      data.forEach((pay, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${pay.date}</td>
+          <td>${pay.customer}</td>
+          <td>₹${pay.amount}</td>
+          <td>${pay.note || '-'}</td>
+          <td><button class="delete-btn" onclick="deletePayment(${index})">Delete</button></td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Delete a payment by index
+    function deletePayment(index) {
+      if (confirm("Are you sure you want to delete this payment?")) {
+        payments.splice(index, 1);
+        localStorage.setItem("payments", JSON.stringify(payments));
+        filterPayments();
+      }
+    }
+
+    // Initial load
+    populateCustomers();
+    renderTable(payments);
+  </script>
+</body>
+</html>

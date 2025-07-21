@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Product - SimpleBooks</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .form-box {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
+      width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      margin-top: 15px;
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5a4de2;
+    }
+
+    .message {
+      margin-top: 15px;
+      color: green;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2 id="formTitle">Add New Product</h2>
+    <input type="text" id="productName" placeholder="Product Name" /><br />
+    <input type="text" id="productCode" placeholder="Product Code" /><br />
+    <input type="number" id="price" placeholder="Price" /><br />
+    <input type="number" id="quantity" placeholder="Quantity" /><br />
+    <button onclick="saveProduct()" id="submitBtn">Save Product</button>
+    <div class="message" id="msg"></div>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById('productName');
+    const codeInput = document.getElementById('productCode');
+    const priceInput = document.getElementById('price');
+    const quantityInput = document.getElementById('quantity');
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('submitBtn');
+    const formTitle = document.getElementById('formTitle');
+
+    let editIndex = localStorage.getItem('editIndex');
+    let editData = localStorage.getItem('editProduct');
+
+    if (editData && editIndex !== null) {
+      let product = JSON.parse(editData);
+      nameInput.value = product.name;
+      codeInput.value = product.code;
+      priceInput.value = product.price;
+      quantityInput.value = product.quantity;
+      btn.innerText = "Update Product";
+      formTitle.innerText = "Edit Product";
+    }
+
+    function saveProduct() {
+      const name = nameInput.value.trim();
+      const code = codeInput.value.trim();
+      const price = priceInput.value.trim();
+      const quantity = quantityInput.value.trim();
+
+      if (!name || !code || !price || !quantity) {
+        alert("❗ Please fill in all fields.");
+        return;
+      }
+
+      let products = JSON.parse(localStorage.getItem('products')) || [];
+      const product = { name, code, price, quantity };
+
+      if (editData && editIndex !== null) {
+        products[editIndex] = product;
+        localStorage.removeItem('editProduct');
+        localStorage.removeItem('editIndex');
+        msg.innerText = "✅ Product updated!";
+      } else {
+        products.push(product);
+        msg.innerText = "✅ Product saved!";
+      }
+
+      localStorage.setItem('products', JSON.stringify(products));
+
+      // Clear inputs
+      nameInput.value = '';
+      codeInput.value = '';
+      priceInput.value = '';
+      quantityInput.value = '';
+      btn.innerText = "Save Product";
+      formTitle.innerText = "Add New Product";
+
+      setTimeout(() => {
+        window.location.href = 'view-products.html';
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

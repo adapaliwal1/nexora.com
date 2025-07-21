@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> Nerxora - Login</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .login-container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 320px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #5a4de2;
+    }
+
+    .footer {
+      margin-top: 15px;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .show-pass {
+      font-size: 13px;
+      color: #555;
+      margin-top: -5px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Welcome to SimpleBooks</h2>
+    <input type="text" id="username" placeholder="Username" /><br />
+    <input type="password" id="password" placeholder="Password" id="passwordInput" /><br />
+    <div class="show-pass">
+      <input type="checkbox" onclick="togglePassword()"> Show Password
+    </div>
+    <button onclick="login()">Login</button>
+    <div class="footer">Hint: admin / admin123</div>
+  </div>
+
+  <script>
+    function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      // Simulated login check
+      if (username === 'admin' && password === 'admin123') {
+        alert("✅ Login successful! Redirecting to dashboard...");
+        // You can redirect to dashboard.html here
+        window.location.href = "dashboard.html";
+      } else {
+        alert("❌ Invalid username or password");
+      }
+    }
+
+    function togglePassword() {
+      const passInput = document.getElementById('password');
+      passInput.type = passInput.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+</body>
+</html>

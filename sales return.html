@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sale Return - SimpleBooks</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .form-box, .table-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin: 20px auto;
+      max-width: 700px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 18px;
+      background-color: #e17055;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #d35400;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e17055;
+      color: white;
+    }
+
+    .filter-box {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      margin: 0 5px;
+      padding: 4px 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #0984e3;
+      color: white;
+      border: none;
+    }
+
+    .delete-btn {
+      background-color: #d63031;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔁 Sale Return</h2>
+
+  <div class="form-box">
+    <label>Product:</label>
+    <input type="text" id="product" />
+
+    <label>Customer:</label>
+    <input type="text" id="customer" />
+
+    <label>Quantity:</label>
+    <input type="number" id="quantity" />
+
+    <label>Reason:</label>
+    <textarea id="reason"></textarea>
+
+    <label>Date:</label>
+    <input type="date" id="date" />
+
+    <button onclick="addOrUpdateReturn()">Submit</button>
+  </div>
+
+  <div class="filter-box">
+    <label>Filter by Customer:</label>
+    <input type="text" id="filterCustomer" oninput="renderReturns()" placeholder="Type customer name..." />
+  </div>
+
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Customer</th>
+          <th>Qty</th>
+          <th>Reason</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="returnTableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let returns = JSON.parse(localStorage.getItem('saleReturns')) || [];
+    let editIndex = -1;
+
+    function saveReturns() {
+      localStorage.setItem('saleReturns', JSON.stringify(returns));
+    }
+
+    function addOrUpdateReturn() {
+      const product = document.getElementById('product').value.trim();
+      const customer = document.getElementById('customer').value.trim();
+      const quantity = document.getElementById('quantity').value.trim();
+      const reason = document.getElementById('reason').value.trim();
+      const date = document.getElementById('date').value;
+
+      if (!product || !customer || !quantity || !date) {
+        alert("All fields except reason are required!");
+        return;
+      }
+
+      const entry = { product, customer, quantity, reason, date };
+
+      if (editIndex === -1) {
+        returns.push(entry);
+      } else {
+        returns[editIndex] = entry;
+        editIndex = -1;
+      }
+
+      saveReturns();
+      resetForm();
+      renderReturns();
+    }
+
+    function resetForm() {
+      document.getElementById('product').value = '';
+      document.getElementById('customer').value = '';
+      document.getElementById('quantity').value = '';
+      document.getElementById('reason').value = '';
+      document.getElementById('date').value = '';
+    }
+
+    function deleteReturn(index) {
+      if (confirm("Are you sure you want to delete this return?")) {
+        returns.splice(index, 1);
+        saveReturns();
+        renderReturns();
+      }
+    }
+
+    function editReturn(index) {
+      const entry = returns[index];
+      document.getElementById('product').value = entry.product;
+      document.getElementById('customer').value = entry.customer;
+      document.getElementById('quantity').value = entry.quantity;
+      document.getElementById('reason').value = entry.reason;
+      document.getElementById('date').value = entry.date;
+      editIndex = index;
+    }
+
+    function renderReturns() {
+      const filterText = document.getElementById('filterCustomer').value.toLowerCase();
+      const tableBody = document.getElementById('returnTableBody');
+      tableBody.innerHTML = '';
+
+      returns
+        .filter(entry => entry.customer.toLowerCase().includes(filterText))
+        .forEach((entry, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${entry.product}</td>
+            <td>${entry.customer}</td>
+            <td>${entry.quantity}</td>
+            <td>${entry.reason || '-'}</td>
+            <td>${entry.date}</td>
+            <td>
+              <button class="action-btn edit-btn" onclick="editReturn(${index})">Edit</button>
+              <button class="action-btn delete-btn" onclick="deleteReturn(${index})">Delete</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+    }
+
+    renderReturns();
+  </script>
+</body>
+</html>

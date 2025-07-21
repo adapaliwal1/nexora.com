@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sales Entry - SimpleBooks</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      background: linear-gradient(to right, #fdfbfb, #ebedee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .form-box {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
+      width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    select, input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      margin-top: 15px;
+      background-color: #00b894;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #019875;
+    }
+
+    .message {
+      margin-top: 15px;
+      color: green;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>🛒 Sales Entry</h2>
+    <select id="productSelect">
+      <option value="">Select Product</option>
+    </select>
+    <input type="number" id="quantity" placeholder="Quantity" min="1" />
+    <input type="number" id="extraPercent" placeholder="Extra % (e.g. 5)" min="0" value="0" />
+    <input type="text" id="customerName" placeholder="Customer Name" />
+    <input type="text" id="total" placeholder="Total Amount" disabled />
+    <button onclick="saveSale()">Save Sale</button>
+    <div class="message" id="msg"></div>
+  </div>
+
+  <script>
+    const productSelect = document.getElementById('productSelect');
+    const quantityInput = document.getElementById('quantity');
+    const extraInput = document.getElementById('extraPercent');
+    const totalInput = document.getElementById('total');
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+
+    // Populate dropdown
+    products.forEach((product, index) => {
+      const opt = document.createElement("option");
+      opt.value = index;
+      opt.textContent = `${product.name} (₹${product.price})`;
+      productSelect.appendChild(opt);
+    });
+
+    // Calculate total on input change
+    function calculateTotal() {
+      const index = productSelect.value;
+      const qty = parseInt(quantityInput.value);
+      const extra = parseFloat(extraInput.value) || 0;
+
+      if (index !== "" && qty > 0) {
+        const price = parseFloat(products[index].price);
+        const baseTotal = price * qty;
+        const extraAmount = baseTotal * (extra / 100);
+        const finalTotal = baseTotal + extraAmount;
+        totalInput.value = "₹" + finalTotal.toFixed(2);
+      } else {
+        totalInput.value = '';
+      }
+    }
+
+    quantityInput.addEventListener("input", calculateTotal);
+    extraInput.addEventListener("input", calculateTotal);
+    productSelect.addEventListener("change", calculateTotal);
+
+    function saveSale() {
+      const index = productSelect.value;
+      const qty = parseInt(quantityInput.value);
+      const extra = parseFloat(extraInput.value) || 0;
+      const customer = document.getElementById('customerName').value.trim();
+
+      if (index === "" || isNaN(qty) || !customer) {
+        alert("Please fill all fields correctly.");
+        return;
+      }
+
+      const product = products[index];
+      const baseTotal = parseFloat(product.price) * qty;
+      const extraAmount = baseTotal * (extra / 100);
+      const finalTotal = baseTotal + extraAmount;
+
+      const sale = {
+        product: product.name,
+        customer: customer,
+        quantity: qty,
+        price: parseFloat(product.price),
+        extraPercent: extra,
+        extraAmount: extraAmount.toFixed(2),
+        total: finalTotal.toFixed(2),
+        date: new Date().toLocaleString()
+      };
+
+      let sales = JSON.parse(localStorage.getItem('sales')) || [];
+      sales.push(sale);
+      localStorage.setItem('sales', JSON.stringify(sales));
+
+      document.getElementById('msg').textContent = "✅ Sale recorded!";
+      quantityInput.value = '';
+      extraInput.value = '0';
+      document.getElementById('customerName').value = '';
+      totalInput.value = '';
+      productSelect.value = '';
+    }
+  </script>
+</body>
+</html>
